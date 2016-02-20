@@ -5,6 +5,8 @@ import com.ning.http.client.AsyncHttpClient
 import scala.concurrent.Promise
 import java.util.concurrent.Executor
 
+
+
 trait WebClient {
   def get(url: String)(implicit exec: Executor): Future[String]
 }
@@ -12,6 +14,7 @@ trait WebClient {
 case class BadStatus(status: Int) extends RuntimeException
 
 object AsyncWebClient extends WebClient{
+  
 
   private val client = new AsyncHttpClient
 
@@ -31,9 +34,4 @@ object AsyncWebClient extends WebClient{
 
   def shutdown(): Unit = client.close()
 
-}
-
-object WebClientTest extends App {
-  import scala.concurrent.ExecutionContext.Implicits.global
-  AsyncWebClient get "http://xing.movecloud.me/api/v0.1/users/1" map println foreach (_ => AsyncWebClient.shutdown())
 }

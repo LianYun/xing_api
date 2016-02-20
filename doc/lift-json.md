@@ -8,7 +8,7 @@
 
 ### 知识要点
 
-#### Json ASR (Abstract Syntax Tree 抽象语法树)
+#### Json AST (Abstract Syntax Tree 抽象语法树)
 
 为每个Json的主要和架构上的类型提供了一个对应的case class。
 ```Scala

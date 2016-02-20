@@ -274,7 +274,7 @@ class LiftJsonTest extends FunSuite {
      val b2 = parse(""" {"make":"ly", "price":350} """).extract[Bike]
      assert(b2 == Bike("ly",350))
      
-     println((json \ "name").extract[String])
+     //println((json \ "name").extract[String])
      
      val json3 = parse("""
          {
@@ -291,7 +291,7 @@ class LiftJsonTest extends FunSuite {
            }
          }""")
     val pa = json3.extract[PersonWithAddresses]
-    println(pa)
+    //rintln(pa)
   }
   
   test("NoTypeHints Serialization test") {
@@ -331,13 +331,13 @@ class LiftJsonTest extends FunSuite {
         </user>
       </users>
     val json = toJson(xml)
-    println(pretty(render(json)))
+    //println(pretty(render(json)))
     
     val transJson = json transform {
       case JField("id", JString(s)) => JField("id", JInt(s.toInt))
       case JField("user", x: JObject) => JField("user", JArray(x :: Nil))
     }
-    println(transJson)
+    //println(transJson)
     
     val vsXml = toXml(json)
   }
