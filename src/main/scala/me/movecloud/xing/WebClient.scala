@@ -1,4 +1,4 @@
-package me.movecloud
+package me.movecloud.xing
 
 import scala.concurrent.Future
 import com.ning.http.client.AsyncHttpClient

@@ -1,5 +1,5 @@
-package me.movecloud
-package xingexceptions
+package me.movecloud.xing
+package exceptions
 
 case class ExpireException(message: String) extends Exception(message)
 
