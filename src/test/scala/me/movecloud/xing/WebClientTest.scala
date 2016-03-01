@@ -1,19 +1,18 @@
-package me.movecloud
+package me.movecloud.xing
 
 import org.scalatest._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 
-
-
 import net.liftweb.json._
+import com.ning.http.client._
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @RunWith(classOf[JUnitRunner])
 class WebClientTest extends FunSuite {
-  import WebsiteConfig._
-  import API0_1._
-  val prefix = mainUrl + apiPrefix
   /**
   test("xxx") {        
     assert(true)
@@ -28,6 +27,7 @@ class WebClientTest extends FunSuite {
   */
   
   test("get user info test") {
+    val userUrl = "http://xing.movecloud.me/api/v0.1/users/1"
   }
   
   test("get conferences info test") {
@@ -39,6 +39,11 @@ class WebClientTest extends FunSuite {
   }
   
   test("authentation info test") {
-  
+    val fau = AsyncWebClient.login("lianyun08@126.com", "12")    
+    val loginTestUrl = "http://xing.movecloud.me/api/v0.1/conferences/1/attendees"
+    
+    val fad = AsyncWebClient.tokenGet(fau, loginTestUrl)
+    
+    fad.foreach(println(_))
   }
 }

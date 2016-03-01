@@ -3,6 +3,9 @@ package me.movecloud.xing
 import models._
 import exceptions._
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class Xing {
 
   // 住构建器中进行全局设计

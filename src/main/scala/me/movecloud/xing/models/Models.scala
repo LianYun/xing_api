@@ -2,7 +2,16 @@ package me.movecloud.xing
 package models
 
 import java.util.Date
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
+
+import me.movecloud.xing.{AsyncWebClient=>client}
+
+
 
 case class Conference (
   id: Int,
@@ -37,19 +46,21 @@ case class Conference (
     */
     
   def getCity(): Future[City] = {
+    implicit val formats = DefaultFormats
     def helperParse(jsonStr: String): City = {
       val json = parse(jsonStr)
       json.extract[City]
     }
-    client.get(city).map(helperParse)
+    client.get(city).map(helperParse(_))
   }
     
   def getTopics(): Future[List[Topic]] = {
-    def helperParse(jsonStr: String): City = {
+    implicit val formats = DefaultFormats
+    def helperParse(jsonStr: String): List[Topic] = {
       val json = parse(jsonStr)
-      json.extract[City]
+      List(json.extract[Topic])
     }
-    client.get(city).map(helperParse)
+    client.get(topics).map(helperParse(_))
   }
   def getComments(): Future[List[Comment]] = ???
     
@@ -91,7 +102,7 @@ case class User (
     */
   def getUserConfes(page: Int): Future[List[Conference]] = ???
     
-  def getPortraitAddr(): Future[Image] = ???
+  def getPortraitAddr(): Future[Nothing] = ???
     
 }
   
@@ -115,14 +126,14 @@ case class Comment (
     */
   def getAuthor(): Future[User] = ???
     
-  def get conference(): Future[Conference] = ???
+  def getConference(): Future[Conference] = ???
     
 }
   
-case class City {
+case class City (
   id: Int,
   name: String
-}
+)
   
 case class Topic (
   id: Int,
