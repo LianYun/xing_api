@@ -9,7 +9,13 @@ import net.liftweb.json._
 import com.ning.http.client._
 
 import scala.concurrent.Future
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
+
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @RunWith(classOf[JUnitRunner])
 class WebClientTest extends FunSuite {
@@ -31,7 +37,36 @@ class WebClientTest extends FunSuite {
   }
   
   test("get conferences info test") {
+    implicit val formats = DefaultFormats
     //AsyncWebClient get prefix + "/conferences/1" map println
+    val jf = AsyncWebClient.get("http://xing.movecloud.me/api/v0.1/conferences/2/topics")
+    import models.Topic
+    
+    jf.foreach{ str =>
+      val json = parse(str)
+      
+      val JArray(fj) = (json \ "topics");
+      val topics = for {
+        jp <- fj
+      } yield jp.extract[Topic]
+      assert(topics == List(Topic(4,"Movie"), Topic(3,"Programming"), Topic(1,"Web")))
+    }
+    
+    val xing = new Xing()
+    
+    val fc = xing.getConference(2)
+    println(Await.result(fc, Duration.Inf))
+    val city = fc.flatMap(_.getCity())
+    println(Await.result(city, Duration.Inf))
+    println(Await.result(fc.flatMap(_.getTopics()), Duration.Inf))
+    
+    val fcs = xing.getAllConferences(2)
+    //for (c <- Await.result(fcs, Duration.Inf))
+      //println(c)
+    
+    //val format: SimpleDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", new Locale("en","US"))
+    //val parsed: Date = format.parse("Wed, 10 Feb 2016 00:00:00 PDT")
+    //println(parsed)
   }
   
   test("get comments info test") {
@@ -44,6 +79,6 @@ class WebClientTest extends FunSuite {
     
     val fad = AsyncWebClient.tokenGet(fau, loginTestUrl)
     
-    fad.foreach(println(_))
+    //println(Await.result(fad, Duration.Inf))
   }
 }

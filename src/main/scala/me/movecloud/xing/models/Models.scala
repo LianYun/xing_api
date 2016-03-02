@@ -14,7 +14,7 @@ import me.movecloud.xing.{AsyncWebClient=>client}
 
 
 case class Conference (
-  id: Int,
+  /**id: Int,  暂且注释，待后端修改后添加*/
   title: String,
   description: String,
   start_time: Date,
@@ -58,7 +58,11 @@ case class Conference (
     implicit val formats = DefaultFormats
     def helperParse(jsonStr: String): List[Topic] = {
       val json = parse(jsonStr)
-      List(json.extract[Topic])
+      
+      val JArray(fj) = (json \ "topics");
+      for {
+        jp <- fj
+      } yield jp.extract[Topic]
     }
     client.get(topics).map(helperParse(_))
   }
@@ -69,7 +73,7 @@ case class Conference (
 }
 
 case class User (
-  id: Int,
+  /**id: Int,  暂且注释，待后端修改后添加*/
   nickname: String,
   about_me: String,
   address: String,

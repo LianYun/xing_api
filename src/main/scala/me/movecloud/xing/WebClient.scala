@@ -67,7 +67,6 @@ object AsyncWebClient extends WebClient{
     implicit val exectext = ExecutionContext.fromExecutor(exec)
     tokenFuture.flatMap(token =>
         {
-            println(token)
             val realm: Realm = new Realm.RealmBuilder()
                     .setPrincipal(token)
                     .setPassword("")
