@@ -35,7 +35,7 @@ class Xing {
     def helperParse(jsonStr: String): List[Conference] = {
       val json = parse(jsonStr)
       
-      val JArray(fj) = (json \ "conferences");
+      val JArray(fj) = (json \ "conferences")
       for {
         jp <- fj
       } yield jp.extract[Conference]
@@ -65,7 +65,12 @@ class Xing {
   
   // user
   
-  def getUser(userId: Int): Future[User] = ???
+  def getUser(userId: Int): Future[User] = {
+    val url = s"${urlPrefix}users/${userId}"
+    val jsonFuture = client.get(url).map(parse(_))
+    
+    jsonFuture.map(_.extract[User])
+  }
   
   def getUserConfes(userId: Int): Future[List[Conference]] = ???
   
@@ -79,9 +84,23 @@ class Xing {
   
   
   // login
-  def login(email: String, password: String): Future[String] = ???
+  def login(email: String, password: String): Future[String] = client.login(email, password)
   
-  def getConferenceAttendees(isLogin: Future[String], conferenceId: Int): Future[List[User]] = ???
+  def getConferenceAttendees(isLogin: Future[String], conferenceId: Int): Future[List[User]] = {
+    val url = "http://xing.movecloud.me/api/v0.1/conferences/${conferenceId}/attendees"
+    
+    val jsonFuture = client.tokenGet(isLogin, url)
+    
+    def helperParse(jsonStr: String): List[User] = {
+      val json = parse(jsonStr)
+      
+      val JArray(fj) = (json \ "attendees")
+      for {
+        jp <- fj
+      } yield jp.extract[User]
+    }
+    jsonFuture.map(helperParse(_))
+  }
   
   def newConference(isLogin: Future[String], conference: Conference): Future[Conference] = ???
   

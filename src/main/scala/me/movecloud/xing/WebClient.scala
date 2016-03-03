@@ -38,10 +38,10 @@ object AsyncWebClient extends WebClient{
     p.future
   }
   
-  def login(name: String, password: String)(implicit exec: Executor): Future[String] = {
+  def login(email: String, password: String)(implicit exec: Executor): Future[String] = {
     val tokenUrl = "http://xing.movecloud.me/api/v0.1/token"
     val realm: Realm = new Realm.RealmBuilder()
-               .setPrincipal(name)
+               .setPrincipal(email)
                .setPassword(password)
                .setUsePreemptiveAuth(true)
                .setScheme(Realm.AuthScheme.BASIC)

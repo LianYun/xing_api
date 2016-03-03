@@ -13,6 +13,8 @@ import me.movecloud.xing.{AsyncWebClient=>client}
 
 
 
+import me.movecloud.xing.utils._
+
 case class Conference (
   /**id: Int,  暂且注释，待后端修改后添加*/
   title: String,
@@ -23,7 +25,10 @@ case class Conference (
   max_attendees: Int,
   city: String,
   topics: String,
-  attendees: String
+  attendees: String,
+  attendees_count: Int,
+  comments: String,
+  comments_count: Int
 ) {
     /**
     http://xing.movecloud.me/api/v0.1/conferences/2
@@ -46,7 +51,6 @@ case class Conference (
     */
     
   def getCity(): Future[City] = {
-    implicit val formats = DefaultFormats
     def helperParse(jsonStr: String): City = {
       val json = parse(jsonStr)
       json.extract[City]
@@ -55,21 +59,43 @@ case class Conference (
   }
     
   def getTopics(): Future[List[Topic]] = {
-    implicit val formats = DefaultFormats
     def helperParse(jsonStr: String): List[Topic] = {
       val json = parse(jsonStr)
       
-      val JArray(fj) = (json \ "topics");
+      val JArray(fj) = (json \ "topics")
       for {
         jp <- fj
       } yield jp.extract[Topic]
     }
     client.get(topics).map(helperParse(_))
   }
-  def getComments(): Future[List[Comment]] = ???
+  def getComments(): Future[List[Comment]] = {
+    def helperParse(jsonStr: String): List[Comment] = {
+      val json = parse(jsonStr)
+      
+      val JArray(fj) = (json \ "comments");
+      for {
+        jp <- fj
+      } yield jp.extract[Comment]
+    }
+    client.get(comments).map(helperParse(_))
+  }
     
-  def getAttendees(): Future[List[User]] = ???
-  
+  def getAttendees(name: String, passwd: String): Future[List[User]] = {
+    
+    val isLogin = client.login(name, passwd)
+    
+    def helperParse(jsonStr: String): List[User] = {
+      val json = parse(jsonStr)
+      
+      val JArray(fj) = (json \ "attendees")
+      for {
+        jp <- fj
+      } yield jp.extract[User]
+    }
+    client.tokenGet(isLogin, attendees).map(helperParse(_))
+  }
+
 }
 
 case class User (
@@ -104,9 +130,22 @@ case class User (
         "url": "http://xing.movecloud.me/api/v0.1/users/2"
     }
     */
-  def getUserConfes(page: Int): Future[List[Conference]] = ???
+  def getUserConfes(page: Int): Future[List[Conference]] = {
+    val url = s"${conferences}?page=${page}"
+    println(url)
     
-  def getPortraitAddr(): Future[Nothing] = ???
+    def helperParse(jsonStr: String): List[Conference] = {
+      val json = parse(jsonStr)
+      
+      val JArray(fj) = (json \ "conferences")
+      for {
+        jp <- fj
+      } yield jp.extract[Conference]
+    }
+    client.get(conferences).map(helperParse(_))
+  }
+    
+  def getPortraitAddr(): Future[Nothing] = ???      // 获得头像的二进制数据
     
 }
   

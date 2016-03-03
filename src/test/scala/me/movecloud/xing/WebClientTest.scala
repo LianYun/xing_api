@@ -34,6 +34,11 @@ class WebClientTest extends FunSuite {
   
   test("get user info test") {
     val userUrl = "http://xing.movecloud.me/api/v0.1/users/1"
+    val xing =  new Xing()
+    
+    val userFuture = xing.getUser(1)
+    
+    userFuture.foreach(println(_))
   }
   
   test("get conferences info test") {
@@ -55,10 +60,10 @@ class WebClientTest extends FunSuite {
     val xing = new Xing()
     
     val fc = xing.getConference(2)
-    println(Await.result(fc, Duration.Inf))
+    //println(Await.result(fc, Duration.Inf))
     val city = fc.flatMap(_.getCity())
-    println(Await.result(city, Duration.Inf))
-    println(Await.result(fc.flatMap(_.getTopics()), Duration.Inf))
+    //println(Await.result(city, Duration.Inf))
+    //println(Await.result(fc.flatMap(_.getTopics()), Duration.Inf))
     
     val fcs = xing.getAllConferences(2)
     //for (c <- Await.result(fcs, Duration.Inf))
@@ -71,6 +76,11 @@ class WebClientTest extends FunSuite {
   
   test("get comments info test") {
     //AsyncWebClient get prefix + "/comments/1" map println
+    val xing = new Xing()
+    val fc = xing.getConference(2)
+    //fc.flatMap(_.getComments).foreach(println(_))
+    
+    //fc.flatMap(_.getAttendees("lianyun08@126.com", "12")).foreach(println(_))
   }
   
   test("authentation info test") {
