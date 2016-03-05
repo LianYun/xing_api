@@ -38,7 +38,9 @@ class WebClientTest extends FunSuite {
     
     val userFuture = xing.getUser(1)
     
-    userFuture.foreach(println(_))
+    //userFuture.foreach(println(_))
+    
+    
   }
   
   test("get conferences info test") {

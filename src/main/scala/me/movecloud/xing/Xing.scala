@@ -22,6 +22,15 @@ class Xing {
   def client = AsyncWebClient
   
   def urlPrefix = "http://xing.movecloud.me/api/v0.1/"
+  
+  private def consListHelper[T](key: String): String => List[T] = jsonStr => {
+    val json = parse(jsonStr)
+      
+      val JArray(fj) = (json \ key)
+      for {
+        jp <- fj
+      } yield jp.extract[T]
+  }
 
   // 住构建器中进行全局设计
   
@@ -32,6 +41,7 @@ class Xing {
 
   def getAllConferences(page: Int): Future[List[Conference]] = {
     val url = s"${urlPrefix}conferences?page=${page}"
+    /**
     def helperParse(jsonStr: String): List[Conference] = {
       val json = parse(jsonStr)
       
@@ -40,7 +50,8 @@ class Xing {
         jp <- fj
       } yield jp.extract[Conference]
     }
-    client.get(url).map(helperParse(_))
+    */
+    client.get(url).map(consListHelper[Conference]("conferences"))
   }
   
   def getConference(conferenceId: Int): Future[Conference] = {
@@ -72,9 +83,35 @@ class Xing {
     jsonFuture.map(_.extract[User])
   }
   
-  def getUserConfes(userId: Int): Future[List[Conference]] = ???
+  def getUserConfes(userId: Int): Future[List[Conference]] = {
+    val url = s"${urlPrefix}users/${userId}/conferences"
+    def helper(str: String): List[Conference] = {
+      val json = parse(str)
+      
+      val JArray(fj) = (json \ "conferences")
+      
+      for {
+        jp <- fj
+      } yield jp.extract[Conference]
+    }
+    
+    client.get(url).map(helper)
+  }
   
-  def getUserFollowed(userId: Int): Future[List[User]] = ???
+  def getUserFollowed(userId: Int): Future[List[User]] = {
+    val url = s"${urlPrefix}users/${userId}/followed"
+    def helper(str: String): List[Conference] = {
+      val json = parse(str)
+      
+      val JArray(fj) = (json \ "conferences")
+      
+      for {
+        jp <- fj
+      } yield jp.extract[Conference]
+    }
+    
+    client.get(url).map(helper)
+  }
   
   def getUserFollowers(userId: Int): Future[List[User]] = ???
   
