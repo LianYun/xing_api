@@ -19,7 +19,7 @@ trait WebClient {
 
 case class BadStatus(status: Int) extends RuntimeException
 
-object AsyncWebClient extends WebClient{
+object AsyncWebClient extends WebClient {
   
 
   private val client = new AsyncHttpClient

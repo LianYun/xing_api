@@ -9,14 +9,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
-import me.movecloud.xing.{AsyncWebClient=>client}
-
-
-
 import me.movecloud.xing.utils._
 
 case class Conference (
-  /**id: Int,  暂且注释，待后端修改后添加*/
+  id: Int,
   title: String,
   description: String,
   start_time: Date,
@@ -51,55 +47,25 @@ case class Conference (
     */
     
   def getCity(): Future[City] = {
-    def helperParse(jsonStr: String): City = {
-      val json = parse(jsonStr)
-      json.extract[City]
-    }
-    client.get(city).map(helperParse(_))
+    client.get(city).map(parse(_)).map(_.extract[City])
   }
     
   def getTopics(): Future[List[Topic]] = {
-    def helperParse(jsonStr: String): List[Topic] = {
-      val json = parse(jsonStr)
-      
-      val JArray(fj) = (json \ "topics")
-      for {
-        jp <- fj
-      } yield jp.extract[Topic]
-    }
-    client.get(topics).map(helperParse(_))
+    client.get(topics).map(consListHelper[Topic]("topics"))
   }
   def getComments(): Future[List[Comment]] = {
-    def helperParse(jsonStr: String): List[Comment] = {
-      val json = parse(jsonStr)
-      
-      val JArray(fj) = (json \ "comments");
-      for {
-        jp <- fj
-      } yield jp.extract[Comment]
-    }
-    client.get(comments).map(helperParse(_))
+    client.get(comments).map(consListHelper[Comment]("comments"))
   }
     
-  def getAttendees(name: String, passwd: String): Future[List[User]] = {
-    
+  def getAttendees(name: String, passwd: String): Future[List[User]] = {  
     val isLogin = client.login(name, passwd)
-    
-    def helperParse(jsonStr: String): List[User] = {
-      val json = parse(jsonStr)
-      
-      val JArray(fj) = (json \ "attendees")
-      for {
-        jp <- fj
-      } yield jp.extract[User]
-    }
-    client.tokenGet(isLogin, attendees).map(helperParse(_))
+    client.tokenGet(isLogin, attendees).map(consListHelper[User]("attendees"))
   }
 
 }
 
 case class User (
-  /**id: Int,  暂且注释，待后端修改后添加*/
+  id: Int,
   nickname: String,
   about_me: String,
   address: String,
@@ -131,18 +97,7 @@ case class User (
     }
     */
   def getUserConfes(page: Int): Future[List[Conference]] = {
-    val url = s"${conferences}?page=${page}"
-    println(url)
-    
-    def helperParse(jsonStr: String): List[Conference] = {
-      val json = parse(jsonStr)
-      
-      val JArray(fj) = (json \ "conferences")
-      for {
-        jp <- fj
-      } yield jp.extract[Conference]
-    }
-    client.get(conferences).map(helperParse(_))
+    client.get(conferences).map(consListHelper[Conference]("conferences"))
   }
     
   def getPortraitAddr(): Future[Nothing] = ???      // 获得头像的二进制数据
@@ -167,10 +122,13 @@ case class Comment (
         "time_stamp": "Fri, 04 Mar 2016 00:00:00 GMT"
     }
     */
-  def getAuthor(): Future[User] = ???
+  def getAuthor(): Future[User] = {
+    client.get(author).map(parse).map(_.extract[User])
+  }
     
-  def getConference(): Future[Conference] = ???
-    
+  def getConference(): Future[Conference] = {
+    client.get(conference).map(parse).map(_.extract[Conference])
+  }  
 }
   
 case class City (

@@ -5,6 +5,7 @@ import exceptions._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.reflect.ClassTag
 
 import net.liftweb.json._
 import com.ning.http.client._
@@ -12,25 +13,9 @@ import com.ning.http.client._
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class Xing {
-  implicit val formats = new DefaultFormats {
-    //Wed, 10 Feb 2016 00:00:00 GMT
-    // EEE, dd MMM yyyy HH:mm:ss z
-    override def dateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", new Locale("en","US"))
-  }
+import me.movecloud.xing.utils._
 
-  def client = AsyncWebClient
-  
-  def urlPrefix = "http://xing.movecloud.me/api/v0.1/"
-  
-  private def consListHelper[T](key: String): String => List[T] = jsonStr => {
-    val json = parse(jsonStr)
-      
-      val JArray(fj) = (json \ key)
-      for {
-        jp <- fj
-      } yield jp.extract[T]
-  }
+class Xing {
 
   // 住构建器中进行全局设计
   
@@ -40,24 +25,13 @@ class Xing {
   // conference
 
   def getAllConferences(page: Int): Future[List[Conference]] = {
-    val url = s"${urlPrefix}conferences?page=${page}"
-    /**
-    def helperParse(jsonStr: String): List[Conference] = {
-      val json = parse(jsonStr)
-      
-      val JArray(fj) = (json \ "conferences")
-      for {
-        jp <- fj
-      } yield jp.extract[Conference]
-    }
-    */
+    val url = s"${urlPrefix}/conferences?page=${page}"
     client.get(url).map(consListHelper[Conference]("conferences"))
   }
   
   def getConference(conferenceId: Int): Future[Conference] = {
-    val url = s"${urlPrefix}conferences/${conferenceId}"
+    val url = s"${urlPrefix}/conferences/${conferenceId}"
     val jsonFuture = client.get(url).map(parse(_))
-    
     jsonFuture.map(_.extract[Conference])
   }
   
@@ -77,66 +51,43 @@ class Xing {
   // user
   
   def getUser(userId: Int): Future[User] = {
-    val url = s"${urlPrefix}users/${userId}"
+    val url = s"${urlPrefix}/users/${userId}"
     val jsonFuture = client.get(url).map(parse(_))
-    
     jsonFuture.map(_.extract[User])
   }
   
   def getUserConfes(userId: Int): Future[List[Conference]] = {
-    val url = s"${urlPrefix}users/${userId}/conferences"
-    def helper(str: String): List[Conference] = {
-      val json = parse(str)
-      
-      val JArray(fj) = (json \ "conferences")
-      
-      for {
-        jp <- fj
-      } yield jp.extract[Conference]
-    }
-    
-    client.get(url).map(helper)
+    val url = s"${urlPrefix}/users/${userId}/conferences"    
+    client.get(url).map(consListHelper[Conference]("conferences"))
   }
   
   def getUserFollowed(userId: Int): Future[List[User]] = {
-    val url = s"${urlPrefix}users/${userId}/followed"
-    def helper(str: String): List[Conference] = {
-      val json = parse(str)
-      
-      val JArray(fj) = (json \ "conferences")
-      
-      for {
-        jp <- fj
-      } yield jp.extract[Conference]
-    }
-    
-    client.get(url).map(helper)
+    val url = s"${urlPrefix}/users/${userId}/followed"    
+    client.get(url).map(consListHelper[User]("followed"))
   }
   
-  def getUserFollowers(userId: Int): Future[List[User]] = ???
+  def getUserFollowers(userId: Int): Future[List[User]] = {
+    val url = s"${urlPrefix}/users/${userId}/followers"    
+    client.get(url).map(consListHelper[User]("followers"))
+  }
   
   
   // comment
-  def getAllComments(page: Int): Future[List[Comment]] = ???
+  def getComment(commentId: Int): Future[Comment] = {
+    val url = s"${urlPrefix}/comments/${commentId}"
+    val jsonFuture = client.get(url).map(parse(_))
+    jsonFuture.map(_.extract[Comment])
+  }
   
   
   // login
   def login(email: String, password: String): Future[String] = client.login(email, password)
   
   def getConferenceAttendees(isLogin: Future[String], conferenceId: Int): Future[List[User]] = {
-    val url = "http://xing.movecloud.me/api/v0.1/conferences/${conferenceId}/attendees"
+    val url = s"${urlPrefix}/conferences/${conferenceId}/attendees"
     
     val jsonFuture = client.tokenGet(isLogin, url)
-    
-    def helperParse(jsonStr: String): List[User] = {
-      val json = parse(jsonStr)
-      
-      val JArray(fj) = (json \ "attendees")
-      for {
-        jp <- fj
-      } yield jp.extract[User]
-    }
-    jsonFuture.map(helperParse(_))
+    jsonFuture.map(consListHelper[User]("attendees"))
   }
   
   def newConference(isLogin: Future[String], conference: Conference): Future[Conference] = ???
@@ -145,6 +96,5 @@ class Xing {
 
 
 object Xing {
-
-  
+  def apply(): Xing = new Xing
 }
