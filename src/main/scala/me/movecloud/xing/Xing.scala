@@ -90,7 +90,20 @@ class Xing {
     jsonFuture.map(consListHelper[User]("attendees"))
   }
   
-  def newConference(isLogin: Future[String], conference: Conference): Future[Conference] = ???
+  def newConference(isLogin: Future[String], conference: Conference): Future[Conference] = {
+    /**
+      {
+        "title" : "...",
+        "city" : "name",
+        "description" : "...md...",
+        "topics": ["name1", "name2"],
+        "start_time" : "DATE",
+        "end_time" : "DATE",
+        "max_attendees": "<int:n>"
+      }
+    */
+    ???
+  }
   
 }
 

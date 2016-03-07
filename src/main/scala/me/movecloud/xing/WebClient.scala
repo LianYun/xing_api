@@ -89,6 +89,11 @@ object AsyncWebClient extends WebClient {
             p.future
         })
   }
+  
+  def tokenPost(tokenFuture: Future[String], url: String, body: String)(implicit exec: Executor): Future[String] = {
+    implicit val exectext = ExecutionContext.fromExecutor(exec)
+    ???
+  }
 
   def shutdown(): Unit = client.close()
 

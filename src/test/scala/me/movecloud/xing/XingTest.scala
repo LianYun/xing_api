@@ -5,6 +5,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 import com.ning.http.client._
 
 import scala.concurrent.Future
@@ -90,5 +91,18 @@ class XingTest extends FlatSpec  with BeforeAndAfter {
     val f1 = xing.getComment(1)
     Await.result(f1, Duration.Inf)
     //f1.foreach(println(_))
+  }
+  
+  "New Conference Test" should "not hava exception" in {
+    val json = 
+      ("title" -> "json post test") ~
+      ("city" -> "xian") ~
+      ("description" -> "") ~
+      ("topics" -> "") ~
+      ("start_time" -> "") ~
+      ("end_time" -> "") ~
+      ("max_attendees" -> 1)
+      
+    println(pretty(render(json)))
   }
 }
